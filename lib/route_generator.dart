@@ -3,9 +3,6 @@ import 'package:flutter_mvvm_with_getit/src/screens/home_screen.dart';
 
 class RouteGenerator {
   static Route<dynamic> generateRoute(RouteSettings settings) {
-    // Getting arguments passed in while calling Navigator.pushNamed
-    final args = settings.arguments as dynamic;
-
     switch (settings.name) {
       case '/':
         return MaterialPageRoute(builder: (_) => const HomeScreen());

@@ -5,6 +5,7 @@ import 'package:flutter_mvvm_with_getit/services/prefs_services.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
 
+import 'package:flutter/foundation.dart';
 import 'api_response.dart';
 import 'http_exception.dart';
 import 'package:http/http.dart' as http;
@@ -17,31 +18,35 @@ abstract class BaseApi {
 
 //TODO: need of api for google login
   Future<void> googleLogIn(Map data, String endpoint) async {
-    var responseBody = json.decode('{"data": "", "status": "NOK"}');
 
     try {
       final uri = Uri.https(_baseUrl, endpoint);
-      print(uri);
+      if (kDebugMode) {
+        print(uri);
+      }
       final response = await http.post(uri, body: data);
-      print(response.statusCode);
+      if (kDebugMode) {
+        print(response.statusCode);
+      }
       if (response.statusCode == 200) {
-        responseBody = jsonDecode(response.body);
       } else {
         Map<String, dynamic> data = jsonDecode(response.body);
 
         String error = 'Error occurred';
-        data.keys.forEach((String key) {
+        for (var key in data.keys) {
           if (key.contains('error')) {
             error = data[key][0];
-            print(error);
+            if (kDebugMode) {
+              print(error);
+            }
           }
-        });
+        }
         throw HttpException(message: error);
       }
-    } on SocketException catch (error) {
+    } on SocketException {
       throw HttpException(message: 'No Internet Connection');
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 
@@ -50,7 +55,9 @@ abstract class BaseApi {
   Future<ApiResponse> getRequest(
       {required String endpoint, Map<String, Object>? query}) async {
     final uri = Uri.https(_baseUrl, endpoint, query);
-    print(uri);
+    if (kDebugMode) {
+      print(uri);
+    }
     return processResponse(await http.get(uri));
   }
 
@@ -58,7 +65,9 @@ abstract class BaseApi {
   Future<ApiResponse> getWithoutAuthRequest(
       {required String endpoint, Map<String, String>? query}) async {
     final uri = Uri.http(_baseUrl, endpoint, query);
-    print(uri);
+    if (kDebugMode) {
+      print(uri);
+    }
     return processResponse(await http.get(
       uri,
     ));
@@ -67,9 +76,13 @@ abstract class BaseApi {
   //POST
   Future<ApiResponse> postRequest(
       String endpoint, Map<String, dynamic> data) async {
-    print("posttttttttttttttttttt");
+    if (kDebugMode) {
+      print("posttttttttttttttttttt");
+    }
     final uri = Uri.http(_baseUrl, endpoint);
-    print(uri);
+    if (kDebugMode) {
+      print(uri);
+    }
     return processResponse(
       await http.post(uri, body: data),
     );
@@ -79,7 +92,9 @@ abstract class BaseApi {
   Future<ApiResponse> patchRequest(
       String endpoint, Map<String, dynamic> data) async {
     final uri = Uri.https(_baseUrl, endpoint);
-    print(uri);
+    if (kDebugMode) {
+      print(uri);
+    }
     return processResponse(await http.patch(uri,
         headers: {
           HttpHeaders.authorizationHeader: 'Token $_authToken',
@@ -90,10 +105,14 @@ abstract class BaseApi {
   // DELETE
   Future<ApiResponse> deleteRequest(
       {required String endpoint, required String id}) async {
-    final String endPointUrl = id == null ? endpoint : '$endpoint/' + '$id/';
-    print(endPointUrl);
+    final String endPointUrl = id.isEmpty ? endpoint : '$endpoint/' '$id/';
+    if (kDebugMode) {
+      print(endPointUrl);
+    }
     final uri = Uri.https(_baseUrl, endPointUrl);
-    print(uri);
+    if (kDebugMode) {
+      print(uri);
+    }
     return processResponse(await http.delete(
       uri,
       headers: {
@@ -110,27 +129,35 @@ abstract class BaseApi {
     // }
     try {
       if (response.statusCode >= 200 && response.statusCode <= 207) {
-        print('==');
+        if (kDebugMode) {
+          print('==');
+        }
         return ApiResponse(data: jsonDecode(response.body));
       } else {
         Map<String, dynamic> data = jsonDecode(response.body);
         String error = 'Error occurred';
-        data.keys.forEach((String key) {
+        for (var key in data.keys) {
           if (key.contains('error')) {
             error = data[key][0];
-            print(error);
+            if (kDebugMode) {
+              print(error);
+            }
           }
-        });
+        }
         return ApiResponse(error: true, errorMessage: error);
       }
-    } on SocketException catch (error) {
-      print('socket');
+    } on SocketException {
+      if (kDebugMode) {
+        print('socket');
+      }
       throw HttpException(message: 'No Internet Connection');
     } on PlatformException catch (error) {
-      print('plt');
+      if (kDebugMode) {
+        print('plt');
+      }
       throw HttpException(message: error.toString());
     } catch (e) {
-      throw e;
+      rethrow;
     }
   }
 }

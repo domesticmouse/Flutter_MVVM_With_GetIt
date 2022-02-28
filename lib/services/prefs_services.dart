@@ -1,9 +1,10 @@
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Prefs {
   final String _userIDStorageKey = 'USER_ID';
   final String _authTokenStorageKey = 'AUTH_TOKEN';
-  Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
+  final Future<SharedPreferences> _prefs = SharedPreferences.getInstance();
   static String _authToken = "";
   static String _uid = "";
 
@@ -26,7 +27,9 @@ class Prefs {
 
   Future<void> setAuthToken(String token) async {
     final SharedPreferences prefs = await _prefs;
-    print('called: $token');
+    if (kDebugMode) {
+      print('called: $token');
+    }
     _authToken = token;
     prefs.setString(_authTokenStorageKey, token);
   }
